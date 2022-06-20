@@ -1,0 +1,13 @@
+lr_latent_start: 0.01
+lr_latent_end: 0.00001
+lr_latent_schedule: exponential
+latent_batch_size: 21
+epochs_latent: 1200
+latent_multi_res_training: True
+latent_epochs_till_res_change: 400
+latent_resize_transform_start: 32
+latent_resize_transform_end: 128
+latent_cosine_similarity_weight: 0.0
+latent_prior_loss_weight: 0.0001
+apply_mask: True
+mask_path: data/processed/Masks/Mask-3.png

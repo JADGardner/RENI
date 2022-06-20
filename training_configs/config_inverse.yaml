@@ -1,0 +1,13 @@
+lr_inverse_start: 0.01
+lr_inverse_end: 0.0001
+lr_inverse_schedule: exponential
+epochs_inverse: 1200
+inverse_multi_res_training: False
+inverse_epochs_till_res_change: 600
+inverse_resize_transform_start: 32
+inverse_resize_transform_end: 64
+inverse_cosine_similarity_weight: 0.0
+inverse_prior_loss_weight: 0.0001
+render_resolution: 64
+object_path: data/graphics/3d_models/teapot.obj
+kd_value: 1.0

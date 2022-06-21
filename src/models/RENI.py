@@ -89,8 +89,8 @@ class RENIAutoDecoder(nn.Module):
 
         self.net = nn.Sequential(*self.net)
 
-    def forward(self, directions):
-        output = self.net(directions)
+    def forward(self, x):
+        output = self.net(x)
         return output
 
 
@@ -156,6 +156,6 @@ class RENIVariationalAutoDecoder(nn.Module):
 
         self.net = nn.Sequential(*self.net)
 
-    def forward(self, directions):
-        output = self.net(directions)
+    def forward(self, x):
+        output = self.net(x)
         return output

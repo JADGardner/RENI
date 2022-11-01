@@ -1,0 +1,130 @@
+##############  ↓  RENI GLOBAL  ↓  ##############
+RENI:
+  TASKS: ["FIT_LATENT", "FIT_INVERSE"] # FIT_DECODER, FIT_LATENT, FIT_INVERSE
+  MODEL_TYPE: VariationalAutoDecoder # AutoDecoder, VariationalAutoDecoder
+  CONDITIONING: Cond-by-Concat # "FiLM" or "Cond-by-Concat"
+  EQUIVARIANCE: SO2 # SO3 | SO2 | None
+  LATENT_DIMENSION: 49 # In the paper this is N : (D = N x 3)
+  HIDDEN_LAYERS: 5 # Number of hidden layers in the decoder
+  HIDDEN_FEATURES: 256 # Number of features in each hidden layer
+  OUT_FEATURES: 3 # Number of features in the output layer, RGB
+  LAST_LAYER_LINEAR: True # If True, the last layer is linear, else a SIREN layer
+  OUTPUT_ACTIVATION: tanh # "tanh" | "exp" | None
+  FIRST_OMEGA_0: 30.0
+  HIDDEN_OMEGA_0: 30.0
+  MAPPING_LAYERS: 3 # Number of layers in the mapping network (if FiLM)
+  MAPPING_FEATURES: 256 # Number of features in each mapping layer (if FiLM)
+
+#####  ↓  TASK SPECIFIC HYPERPARAMETERS  ↓  #####
+##############  ↓  FIT_DECODER  ↓  ##############
+  FIT_DECODER:
+    LR_START: 1e-5
+    LR_END: 1e-7 # If using lr scheduler, this will be the final lr
+    OPTIMIZER: adam
+    OPTIMIZER_BETA_1: 0.0
+    OPTIMIZER_BETA_2: 0.9
+    SCHEDULER_TYPE: exponential
+    SCHEDULER_STEP_SIZE: 1
+    SCHEDULER_GAMMA: 1
+    BATCH_SIZE: 100
+    EPOCHS: 2400
+    MULTI_RES_TRAINING: True # If False, FINAL_RESOLUTION will be used
+    INITAL_RESOLUTION: [16, 32]
+    FINAL_RESOLUTION: [64, 128] # If MULTI_RES_TRAINING is False, this will be used
+    CURRICULUM: [800, 1600] # Epochs at which to double the resolution [100, 500, ...] | None ... if None res changes will be evenly spaced across epochs
+    KLD_WEIGHTING: 1e-4 # Weighting of the KLD loss
+
+##############  ↓  FIT_LATENT  ↓  ##############
+  FIT_LATENT:
+    LR_START: 1e-2
+    LR_END: 1e-4 # If using lr scheduler, this will be the final lr
+    OPTIMIZER: adam
+    OPTIMIZER_BETA_1: 0.0
+    OPTIMIZER_BETA_2: 0.9
+    SCHEDULER_TYPE: exponential
+    SCHEDULER_STEP_SIZE: 1
+    SCHEDULER_GAMMA: 1
+    BATCH_SIZE: 21
+    EPOCHS: 2400
+    MULTI_RES_TRAINING: True # If False, FINAL_RESOLUTION will be used
+    INITAL_RESOLUTION: [16, 32]
+    FINAL_RESOLUTION: [64, 128] # If MULTI_RES_TRAINING is False, this will be used
+    CURRICULUM: [800, 1600] # Epochs at which to double the resolution [100, 500, ...] | None ... if None will be evenly spaced across epochs
+    COSINE_SIMILARITY_WEIGHT: 1e-4 # Weighting of the cosine similarity loss
+    PRIOR_LOSS_WEIGHT: 1e-7 # Weighting of the prior loss
+    APPLY_MASK: False # Masking for RENI inpainting task
+    MASK_PATH: data/Masks/Mask-3.png # Path to mask for RENI inpainting task
+
+##############  ↓  FIT_INVERSE  ↓  ##############
+  FIT_INVERSE:
+    LR_START: 1e-2
+    LR_END: 1e-4 # If using lr scheduler, this will be the final lr
+    OPTIMIZER: adam
+    OPTIMIZER_BETA_1: 0.0
+    OPTIMIZER_BETA_2: 0.9
+    SCHEDULER_TYPE: exponential
+    SCHEDULER_STEP_SIZE: 1
+    SCHEDULER_GAMMA: 1
+    BATCH_SIZE: 3
+    EPOCHS: 2400
+    MULTI_RES_TRAINING: False # If False, FINAL_RESOLUTION will be used
+    INITAL_RESOLUTION: [16, 32]
+    FINAL_RESOLUTION: [64, 128] # If MULTI_RES_TRAINING is False, this will be used
+    CURRICULUM: [800, 1600] # Epochs at which to double the resolution [100, 500, ...] | None ... if None will be evenly spaced across epochs
+    COSINE_SIMILARITY_WEIGHT: 1e-3 # Weighting of the cosine similarity loss
+    PRIOR_LOSS_WEIGHT: 1e-7 # Weighting of the prior loss
+    RENDERER: PyTorch3D # Renderer to use for inverse rendering task
+    RENDER_RESOLUTION: 128 # Resolution at which to render the object
+    OBJECT_PATH: data/3D_Models/teapot.obj # Path to object to render
+    KD_VALUE: 0.5 # Value of the diffuse term in blinn-phong shading, specular term is 1.0 - KD_VALUE
+
+
+##############  ↓  DATASET  ↓  ##############
+DATASET:
+  NAME: RENI_HDR # RENI_HDR | RENI_LDR | CUSTOM
+
+  RENI_HDR:
+    PATH: data/RENI_HDR
+    TRANSFORMS: [["minmaxnormalise", [-18.0536, 11.4633]]] # resize and totensor applied automatically for minmaxnormalise arg provide [] if not known else [min, max]
+    IS_HDR: True # If True, will use HDR transforms
+
+  RENI_LDR:
+    PATH: data/RENI_LDR
+    TRANSFORMS: [['normalize', [[0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]]] # resize and totensor applied automatically
+    IS_HDR: False # If True, will use HDR transforms
+  
+  CUSTOM: # For other custom datasets
+    PATH: data/custom
+    TRANSFORMS: [["normalize", []]] # resize and totensor applied automatically
+    IS_HDR: True # If True, will use HDR transforms
+
+##############  ↓  TRAINER  ↓  ##############
+TRAINER:
+  LOGGER_TYPE: tensorboard # tensorboard | wandb
+  SEED: 42 # Random seed
+  MIXED_PRECISION: False # If True, will use mixed precision training will not work with Inverse Task
+  MAX_RUNTIME: 24 # hours
+  
+  CHKPTS:
+    SAVE: True
+    SAVE_DIR: "checkpoints"
+    EVERY_N_EPOCHS: 10
+    LOAD_PATH: 'models/latent_dim_49_net_5_256_vad_film_tanh_hdr/version_0/checkpoints/fit_decoder_epoch=589.ckpt' # Path of lightning checkpoint to load, if RENI.TASKS contains FIT_DECODER, decoder weights will be loaded but optimisation will start from scratch
+
+  LOGGER:
+    LOG_IMAGES: True
+    NUMBER_OF_IMAGES: 10 # number of example images to log if 'IMAGES_TO_SHOW' is 'noise' or 'random'
+    IMAGES_TO_SHOW: random  # noise (radom latent codes) | random (random dataset idx) | [0, 1, 2, 3, 5, 6, 7, 8, 9, 10] (specific idx)
+    EPOCHS_BETWEEN_EXAMPLES: 10 # How often to log example images
+
+    WANDB:
+      NAME: RENI
+      PROJECT: RENI
+      SAVE_DIR: wandb
+      OFFLINE: False
+      LOG_MODEL: True
+
+    TB:
+      SAVE_DIR: models # where to save the tensorboard logs
+      NAME: auto # Name of the experiment or 'auto' for auto naming
+      LOG_GRAPH: True

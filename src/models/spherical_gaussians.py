@@ -7,7 +7,6 @@ from utils.loss_functions import WeightedMSE
 
 """ https://github.com/lzqsd/SphericalGaussianOptimization """
 
-
 class SGEnvOptim:
     def __init__(
         self,

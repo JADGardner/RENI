@@ -819,3 +819,12 @@ def get_sh_order(ndims):
     while calc_num_sh_coeffs(order) < ndims:
         order += 1
     return order
+
+def get_spherical_harmonic_representation(img, nBands):
+    # img: (H, W, 3), nBands: int
+    iblCoeffs = getCoefficientsFromImage(img, nBands)
+    sh_radiance_map = shReconstructSignal(
+        iblCoeffs, width=img.shape[1]
+    )
+    sh_radiance_map = torch.from_numpy(sh_radiance_map)
+    return sh_radiance_map

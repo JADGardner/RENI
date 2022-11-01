@@ -138,9 +138,8 @@ dmypy.json
 cython_debug/
 
 wandb/
-render/
-sphere_render/
-render_envmap/
-
-data/processed/HDRI_Test
-data/processed/HDRI_Train
+tensorboard/
+data/RENI_HDR/
+data/RENI_LDR/
+models/
+.vscode/

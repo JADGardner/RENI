@@ -18,6 +18,8 @@ If you use our code, please cite the following paper:
 ```
 
 ## News:
+### **27/11/2023**: Checkout our improved model RENI++: A Rotation-Equivariant, Scale-Invariant, Natural Illumination Prior [here](https://github.com/JADGardner/ns_reni)
+
 **01/11/2022**: Updated code! Now implemented using PyTorch-Lightning. Refactored code makes training and using RENI in downstream tasks easier.
 
 **15/09/2022**: Accepted to NeurIPS 2022!!! 
